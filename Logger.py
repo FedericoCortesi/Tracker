@@ -78,43 +78,10 @@ class Logger:
         print(session_data)
 
         # Save df
-        self._save(time_name=self.start_time.strftime("%H_%M_%S"), data=session_data)
+        self._save(data=session_data)
         
 
-    def export_cache(self):
-        # List all files
-        cache_df_names_list = os.listdir("./Logs/Cache")
-
-        cache_dfs = []
-        # convert files to dataframes
-        for name in cache_df_names_list:
-            cache_dfs.append(pd.read_csv(f"./Logs/Cache/{name}"))
-
-        # create a unique df
-        df_cache = pd.concat(cache_dfs, axis=0, ignore_index=True)
-
-        # Load study df        
-        df_study = pd.read_csv("./Logs/study_sessions.csv", index_col=0)
-
-        # concat and save
-        df_study = pd.concat([df_study, df_cache], axis=0, ignore_index=False)
-        df_study.reset_index(drop=True, inplace=True)
-        df_study.to_csv("./Logs/study_sessions.csv", index=True)
-
-        print("File saved at: ./Logs/study_sessions.csv")
-
-        # Delete files in cache 
-        self._delete_all_files_cache()
-        
-
-
-    
-
-    def _save(self, time_name: str = None, data: dict = None):
-        # Build Name
-        timestamp = self.end_time.strftime("%H_%M_%S") if time_name is None else time_name
-        out_path = f"./Logs/Cache/log_{timestamp}.csv"       
-
+    def _save(self, data: dict = None):
         # Build df
         df_cache = pd.DataFrame(data, index=[0])
 
@@ -123,23 +90,16 @@ class Logger:
         df_cache['start_time'] = pd.to_datetime(df_cache['start_time'])
         df_cache['end_time'] = pd.to_datetime(df_cache['end_time'])
 
-        # Save df
-        df_cache.to_csv(out_path, mode="a", index=False)
-        
-        
-        print(f"File saved at: {out_path}")
+        # Read df
+        df_study = pd.read_csv("./Logs/study_sessions.csv", index_col=0)
 
+        # concat and save
+        df_study = pd.concat([df_study, df_cache], axis=0, ignore_index=False)
+        df_study.reset_index(drop=True, inplace=True)
+        df_study.to_csv("./Logs/study_sessions.csv", index=True)        
+        
+        print(f"File saved at: ./Logs/study_sessions.csv")
 
-    def _delete_all_files_cache(self, directory:str="./Logs/Cache"):
-        # Iterate over all files in the specified directory
-        for filename in os.listdir(directory):
-            file_path = os.path.join(directory, filename)  # Create full file path
-            try:
-                if os.path.isfile(file_path):  # Check if it's a file
-                    os.remove(file_path)  # Delete the file
-                    print(f'Deleted: {file_path}')
-            except Exception as e:
-                print(f'Error deleting file {file_path}: {e}')
 
 
 
