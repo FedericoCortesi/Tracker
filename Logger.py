@@ -2,7 +2,6 @@ import pandas as pd
 from datetime import datetime
 import time
 import threading
-import os
 
 class Logger:
     def __init__(self, path:str="./Logs/study_sessions.csv") -> None:
@@ -53,6 +52,13 @@ class Logger:
 
         timer_thread = threading.Thread(target=update_timer, daemon=True)
         timer_thread.start()
+
+    def abort_session(self):
+        if self.is_studying == True:
+            self.is_studying = False
+            print(f"Study session of {self.start_time.strftime('%H:%M:%S')} aborted")
+        else:
+            print(f"Study session of {self.start_time.strftime('%H:%M:%S')} already aborted")
 
 
     def end_session(self):
