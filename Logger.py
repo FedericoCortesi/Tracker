@@ -40,7 +40,7 @@ class Logger:
     def _display_timer(self):
         def update_timer():
             # retrieve time passsed today
-            df_today, time_today = self._today_stats()
+            _, time_today = self._today_stats()
 
             while self.is_studying:
                 # Format the elapsed time
