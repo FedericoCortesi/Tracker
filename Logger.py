@@ -2,16 +2,29 @@ import pandas as pd
 from datetime import datetime
 import time
 import threading
+import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
+import seaborn as sns
+
+
+from utils import *
 
 class Logger:
     def __init__(self, path:str="./Logs/study_sessions.csv") -> None:
+        # Read df with sessions
         self.path = path
         self.data = pd.read_csv(self.path) 
+        
+        # Validation
         self.valid_subjects = ["MFI", "Valuation", "IB"]
         self.valid_sessions = ["Morning", "Afternoon", "Evening"]
-
         print(f"\nThe available subjects are: {self.valid_subjects}\n")
         print(f"\nThe available sessions are: {self.valid_sessions}\n")
+
+        # Setting plot context 
+        sns.set_context("notebook")  # You can choose 'paper', 'notebook', 'talk', or 'poster'
+        sns.set_style("whitegrid")
+
 
     def start_session(self, subject: str = None, session:str=None, begin_time=None):
         # Validate subject and session
@@ -81,7 +94,7 @@ class Logger:
             print(f"Study session ended at {self.end_time.strftime('%H:%M:%S')}")
         else:
             print(f"Session already ended at: {self.end_time.strftime('%H:%M:%S')}")
-
+            return
 
         # Compute total time and print message
         total_time = (self.end_time - self.start_time)
@@ -136,3 +149,45 @@ class Logger:
         time_today = df_today["total_time"].sum()
         
         return df_today, time_today
+    
+    def plot_all_sessions(self):
+        df_ex = self._open_log()
+
+        # Computing total seconds
+        df_ex['total_time_seconds'] = df_ex['total_time'].dt.total_seconds()
+
+        # Create the plot
+        plt.figure(figsize=(10, 6))
+        sns.lineplot(data=df_ex, x=df_ex.index, y="total_time_seconds")
+
+        # Format the y-axis to show time in HH:MM:SS
+        formatter = FuncFormatter(seconds_to_hms)
+        plt.gca().yaxis.set_major_formatter(formatter)
+
+        plt.xlabel('Index')
+        plt.ylabel('Total Time (HH:MM:SS)')
+        plt.title('Time per Session')
+        plt.show()
+
+
+    def plot_days_total(self, figsize:tuple=(15,9)):
+        df_ex = self._open_log()
+
+        # Aggregate days
+        df_grouped = df_ex.groupby(["day"]).agg({"total_time": "sum"})
+
+        # Find time for each 
+        df_grouped['total_time_seconds'] = df_grouped['total_time'].dt.total_seconds()
+
+        # Create the plot
+        plt.figure(figsize=figsize)
+        sns.barplot(data=df_grouped, x=df_grouped.index, y="total_time_seconds")
+
+        # Format the y-axis to show time in HH:MM:SS
+        formatter = FuncFormatter(seconds_to_hms)
+        plt.gca().yaxis.set_major_formatter(formatter)
+
+        plt.xlabel('Day')
+        plt.ylabel('Total Time (HH:MM:SS)')
+        plt.title('Total Time Spent Studying')
+        plt.show()
