@@ -15,39 +15,45 @@ class Logger:
         self.path = path
         self.data = pd.read_csv(self.path) 
         
+        # Define is studying
+        self.is_studying : bool = None
+        
         # Validation
         self.valid_subjects = ["MFI", "Valuation", "IB"]
         self.valid_sessions = ["Morning", "Afternoon", "Evening"]
         print(f"\nThe available subjects are: {self.valid_subjects}\n")
         print(f"\nThe available sessions are: {self.valid_sessions}\n")
 
-        # Setting plot context 
-        sns.set_context("notebook")  # You can choose 'paper', 'notebook', 'talk', or 'poster'
-        sns.set_style("whitegrid")
+
+
 
 
     def start_session(self, subject: str = None, session:str=None, begin_time=None):
-        # Validate subject and session
-        assert subject is not None, "Input a Subject!"
-        self.subject = subject
-        if self.subject not in self.valid_subjects:
-            raise ValueError(f"{self.subject} is not a valid subject. Please choose from: {self.valid_subjects}")
+        if self.is_studying != True:
+            # Set Studying to True 
+            self.is_studying = True
+                    
+            # Validate subject and session
+            assert subject is not None, "Input a Subject!"
+            self.subject = subject
+            if self.subject not in self.valid_subjects:
+                raise ValueError(f"{self.subject} is not a valid subject. Please choose from: {self.valid_subjects}")
 
-        assert session is not None, "Input a Session!"
-        self.session = session
-        if self.session not in self.valid_sessions:
-            raise ValueError(f"{self.subject} is not a valid subject. Please choose from: {self.valid_sessions}")
+            assert session is not None, "Input a Session!"
+            self.session = session
+            if self.session not in self.valid_sessions:
+                raise ValueError(f"{self.subject} is not a valid subject. Please choose from: {self.valid_sessions}")
+            
+            # Capture the start time
+            self.start_time = datetime.now() if begin_time == None else begin_time
+            
+            print(f"\nStudy session started at {self.start_time.strftime('%H:%M:%S')}")
+            
+            # Call function to upadate timer 
+            self._display_timer()
         
-        # Capture the start time
-        self.start_time = datetime.now() if begin_time == None else begin_time
-        
-        # Set Studying to True 
-        self.is_studying = True
-
-        print(f"\nStudy session started at {self.start_time.strftime('%H:%M:%S')}")
-        
-        # Call function to upadate timer 
-        self._display_timer()
+        else:
+            print(f"Session already started at {self.start_time.strftime('%H:%M:%S')}")
 
 
     def _display_timer(self):
@@ -151,6 +157,10 @@ class Logger:
         return df_today, time_today
     
     def plot_all_sessions(self):
+        # Setting plot context 
+        sns.set_context("notebook")  
+        sns.set_style("darkgrid")
+
         df_ex = self._open_log()
 
         # Computing total seconds
@@ -171,6 +181,10 @@ class Logger:
 
 
     def plot_days_total(self, figsize:tuple=(15,9)):
+        # Setting plot context 
+        sns.set_context("notebook")  
+        sns.set_style("darkgrid")
+
         df_ex = self._open_log()
 
         # Aggregate days
