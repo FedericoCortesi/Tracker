@@ -19,15 +19,15 @@ exit_app = False
 
 def setup_environment():
     """Set up the necessary directory structure and files"""
-    # Create Logs directory if it doesn't exist
-    if not os.path.exists("./Logs"):
-        os.makedirs("./Logs")
+    # Create logs directory if it doesn't exist
+    if not os.path.exists("./logs"):
+        os.makedirs("./logs")
     
     # Create study_sessions.csv if it doesn't exist
-    if not os.path.exists("./Logs/study_sessions.csv"):
+    if not os.path.exists("./logs/study_sessions.csv"):
         # Create an empty DataFrame with the required columns
         df = pd.DataFrame(columns=["day", "start_time", "end_time", "total_time", "session", "subject"])
-        df.to_csv("./Logs/study_sessions.csv", index=True)
+        df.to_csv("./logs/study_sessions.csv", index=True)
         print("Created new study sessions log file.")
 
 def signal_handler(sig, frame):

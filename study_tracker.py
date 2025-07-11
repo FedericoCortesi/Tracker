@@ -56,7 +56,11 @@ class StudyTracker:
             # retrieve time passsed today
             out = self._today_stats()
             time_today = out[1]
-            pause_now = self.start_time - out[0].iloc[-1,2]
+            # try to retrieve pause, 
+            try:
+                pause_now = self.start_time - out[0].iloc[-1,2]
+            except IndexError:
+                pause_now = timedelta(0)
             pause_today = out[2]
             pause_today = pause_today + pause_now
 
@@ -134,14 +138,14 @@ class StudyTracker:
         df_cache['end_time'] = pd.to_datetime(df_cache['end_time'])
 
         # Read df
-        df_study = pd.read_csv("./Logs/study_sessions.csv", index_col=0)
+        df_study = pd.read_csv("./logs/study_sessions.csv", index_col=0)
 
         # concat and save
         df_study = pd.concat([df_study, df_cache], axis=0, ignore_index=False)
         df_study.reset_index(drop=True, inplace=True)
-        df_study.to_csv("./Logs/study_sessions.csv", index=True)        
+        df_study.to_csv("./logs/study_sessions.csv", index=True)        
         
-        print(f"File saved at: ./Logs/study_sessions.csv")
+        print(f"File saved at: ./logs/study_sessions.csv")
 
 
         # total time 
@@ -165,7 +169,7 @@ class StudyTracker:
 
     def _open_log(self):
         """Open the log file parsing the dates"""
-        df_log = pd.read_csv("./Logs/study_sessions.csv", index_col=0, parse_dates=['start_time', 'end_time'])
+        df_log = pd.read_csv("./logs/study_sessions.csv", index_col=0, parse_dates=['start_time', 'end_time'])
         df_log['total_time'] = pd.to_timedelta(df_log['total_time'])
         return df_log
 
